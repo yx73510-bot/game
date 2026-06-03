@@ -1,0 +1,15 @@
+{
+  "name": "water-game-ai-version",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "node --check api/choice.js"
+  },
+  "dependencies": {
+    "openai": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
