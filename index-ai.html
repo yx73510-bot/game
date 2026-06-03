@@ -1,0 +1,1078 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>潮汐之誓 · Chapter 1</title>
+  <style>
+    :root{
+      --bg:#061126; --panel:rgba(4,12,30,.72); --panel2:rgba(10,22,46,.88);
+      --line:rgba(126,190,255,.28); --text:#eaf5ff; --muted:#a9c4e6;
+      --accent:#7ec8ff; --accent2:#cbeeff; --gold:#f3d38b;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#020712;color:var(--text);font-family:"Noto Serif SC","Songti SC","STSong","Microsoft YaHei",serif;}
+    body:before{content:"";position:fixed;inset:0;background:radial-gradient(circle at 50% 10%,rgba(36,126,255,.24),transparent 42%),linear-gradient(180deg,#020713,#061126 52%,#020713);pointer-events:none;}
+    #app{position:relative;width:100vw;height:100vh;overflow:hidden;}
+    .screen{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:#020713;cursor:pointer;}
+    .fullImage{width:100%;height:100%;object-fit:contain;background:#020713;display:block;}
+    .clickHint{position:absolute;left:50%;bottom:18px;transform:translateX(-50%);font-size:14px;color:rgba(230,245,255,.78);letter-spacing:.12em;text-shadow:0 0 12px rgba(97,178,255,.75);animation:pulse 1.8s infinite ease-in-out;}
+    @keyframes pulse{0%,100%{opacity:.45}50%{opacity:.95}}
+    .hotspot{position:absolute;cursor:pointer;border-radius:999px;background:transparent !important;border:none !important;box-shadow:none !important;outline:none !important;padding:0;opacity:0;-webkit-appearance:none;appearance:none;}
+    .hotspot:hover,.hotspot:focus,.hotspot:active{background:transparent !important;border:none !important;box-shadow:none !important;outline:none !important;opacity:0;}
+    #startHotspot,#loadingHotspot{inset:0;width:100%;height:100%;border-radius:0;}
+    .game{position:absolute;inset:0;display:none;flex-direction:column;background:#020713;}
+    .imageWrap{height:60vh;min-height:46vh;position:relative;display:flex;align-items:center;justify-content:center;background:#020713;border-bottom:1px solid var(--line);}
+    .storyImage{max-width:100%;max-height:100%;width:100%;height:100%;object-fit:contain;display:block;}
+    .imageTitle{position:absolute;left:18px;top:14px;padding:6px 12px;border:1px solid rgba(126,200,255,.25);background:rgba(2,8,20,.48);backdrop-filter:blur(8px);border-radius:999px;font-size:13px;color:var(--accent2);letter-spacing:.08em;text-shadow:0 0 12px rgba(126,200,255,.5);}
+    .textPanel{height:40vh;min-height:220px;padding:12px 14px 14px;background:linear-gradient(180deg,rgba(4,14,32,.92),rgba(2,8,20,.98));box-shadow:0 -18px 45px rgba(0,0,0,.32);display:flex;gap:12px;}
+    .storyBox{flex:1;overflow-y:auto;padding:12px 14px;border:1px solid var(--line);border-radius:16px;background:var(--panel);scrollbar-width:thin;scrollbar-color:rgba(126,200,255,.4) rgba(255,255,255,.05);}
+    .storyBox h2{margin:0 0 8px;color:var(--accent2);font-size:18px;font-weight:500;letter-spacing:.05em;}
+    .storyBox p{margin:.42em 0;line-height:1.55;font-size:15.5px;letter-spacing:.03em;color:rgba(238,248,255,.94);}
+    .storyBox .blueKey{color:#8bd3ff;font-weight:700;text-shadow:0 0 10px rgba(82,180,255,.35);}
+    .controlPanel{width:250px;display:flex;flex-direction:column;gap:8px;}
+    button{font-family:inherit;border:none;cursor:pointer;color:var(--text);}
+    .mainBtn{padding:10px 14px;border-radius:14px;border:1px solid rgba(126,200,255,.35);background:linear-gradient(180deg,rgba(34,93,166,.8),rgba(12,37,82,.9));box-shadow:0 0 16px rgba(70,160,255,.18);font-size:15px;letter-spacing:.08em;}
+    .mainBtn:hover{filter:brightness(1.12)}
+    .ghostBtn{padding:8px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.055);font-size:13px;color:var(--muted);}
+    .choiceBox{display:none;gap:7px;flex-direction:column;padding:10px;border:1px solid rgba(243,211,139,.25);border-radius:16px;background:rgba(24,18,8,.25);}
+    .choiceTitle{font-size:14px;color:var(--gold);letter-spacing:.06em;margin-bottom:2px;}
+    .choiceBtn{text-align:left;padding:8px 10px;border-radius:12px;background:rgba(10,28,62,.78);border:1px solid rgba(126,200,255,.22);font-size:13.5px;line-height:1.35;color:#eaf5ff;}
+    .choiceBtn:hover{background:rgba(23,60,116,.88)}
+    .customBox{display:none;gap:7px;flex-direction:column;}
+    textarea{width:100%;height:70px;resize:none;border-radius:12px;border:1px solid rgba(126,200,255,.24);background:rgba(1,7,18,.72);color:var(--text);padding:9px;font-family:inherit;font-size:13px;outline:none;}
+    .note{font-size:12px;line-height:1.45;color:rgba(190,214,240,.72);padding:8px 10px;border-radius:12px;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.08);}
+    .archivePre{white-space:pre-wrap;background:rgba(2,7,17,.72);border:1px solid rgba(126,200,255,.24);border-radius:12px;padding:12px;line-height:1.55;color:#ecf7ff;max-height:230px;overflow:auto;}
+    .topTools{position:absolute;right:14px;top:14px;display:flex;gap:8px;z-index:5;flex-wrap:wrap;justify-content:flex-end;max-width:calc(100% - 28px);}
+    .toolBtn{padding:7px 10px;border-radius:999px;background:rgba(2,8,20,.56);border:1px solid rgba(126,200,255,.22);color:rgba(230,245,255,.85);font-size:12px;backdrop-filter:blur(8px);}
+    @media(max-width:760px){.imageWrap{height:54vh}.textPanel{height:46vh;flex-direction:column;padding:10px}.controlPanel{width:100%;}.storyBox p{font-size:14.5px}.choiceBox{max-height:170px;overflow:auto}}
+  </style>
+</head>
+<body>
+<div id="app">
+  <section id="startScreen" class="screen">
+    <img id="startImg" class="fullImage" src="images/start-screen.png" alt="首页" />
+    <button class="hotspot" id="startHotspot" aria-label="开始"></button>
+  </section>
+
+  <section id="loadingScreen" class="screen" style="display:none;">
+    <img id="loadingImg" class="fullImage" src="images/loading-chapter1.png" alt="Chapter 1 加载页" />
+    <button class="hotspot" id="loadingHotspot" aria-label="进入章节"></button>
+  </section>
+
+  <section id="game" class="game">
+    <div class="topTools">
+      <button class="toolBtn" id="saveBtn">保存</button>
+      <button class="toolBtn" id="loadBtn">读档</button>
+      <button class="toolBtn" id="restartBtn">重新开始</button>
+      <button class="toolBtn" id="toggleMusicBtn">♪ 音乐</button>
+    </div>
+    <div class="imageWrap">
+      <img id="storyImage" class="storyImage" src="" alt="剧情图" />
+      <div id="imageTitle" class="imageTitle"></div>
+    </div>
+    <div class="textPanel">
+      <article id="storyBox" class="storyBox"></article>
+      <aside class="controlPanel">
+        <button id="nextBtn" class="mainBtn">继续</button>
+        <div id="choiceBox" class="choiceBox"></div>
+        <div id="customBox" class="customBox">
+          <textarea id="customInput" maxlength="20" placeholder="自定义行动最多20个字。提交后会调用 AI 生成后续。"></textarea>
+          <button id="customSubmit" class="mainBtn">提交自定义行动</button>
+        </div>
+        <div id="progressNote" class="note"></div>
+      </aside>
+    </div>
+  </section>
+</div>
+
+<script src="scripts/save-system.js"></script>
+<script>
+const storyData = {
+  "id": "water_old_case_chapter1",
+  "title": "《水国旧案》Chapter 1：潮汐宴会",
+  "uiConfig": {
+    "imagePosition": "top",
+    "textPosition": "bottom",
+    "imageFit": "contain",
+    "preserveFullImage": true,
+    "textScroll": true,
+    "textMaxHeight": "34vh",
+    "fontSize": "16px",
+    "lineHeight": 1.65,
+    "paragraphGap": "0.65em",
+    "choiceButtonStyle": "compact",
+    "hideStatsDuringPlay": true,
+    "startClickMode": "click-anywhere",
+    "loadingClickMode": "click-anywhere"
+  },
+  "imageManifest": {
+    "start": {
+      "file": "images/start-screen.png",
+      "originalUploadName": "ChatGPT Image 2026年5月25日 14_31_13(1).png",
+      "note": "首页。点击图上的“开始”进入加载页。"
+    },
+    "loading": {
+      "file": "images/loading-chapter1.png",
+      "originalUploadName": "ChatGPT Image 2026年5月25日 14_36_32(2).png",
+      "note": "Chapter 1 加载页。点击图上的“加载中”进入正式章节。"
+    },
+    "invitation": {
+      "file": "images/invitation-letter.png",
+      "originalUploadName": "邀请(2).PNG",
+      "note": "背景介绍。"
+    },
+    "archive_lio": {
+      "file": "images/archive-lio.png",
+      "originalUploadName": "小利奥(5).png",
+      "note": "第一幕正式进入，南部地方档案室，利奥搬旧档。"
+    },
+    "old_water_map": {
+      "file": "images/old-water-map.png",
+      "originalUploadName": "旧水脉图(4).png",
+      "note": "剧情进行到《南部旧水脉原图》/水脉图时切换。"
+    },
+    "home_room": {
+      "file": "images/home-room.png",
+      "originalUploadName": "家(6).png",
+      "note": "回家剧情。"
+    },
+    "mira_hairpin": {
+      "file": "images/mira-hairpin.png",
+      "originalUploadName": "米拉给我(4).png",
+      "note": "米拉递给艾莉丝银簪。"
+    },
+    "capital_road": {
+      "file": "images/capital-road.png",
+      "originalUploadName": "王都路上(3).png",
+      "note": "进入王都/马车路上。"
+    },
+    "submit_report": {
+      "file": "images/submit-report.png",
+      "originalUploadName": "递交文书(2).png",
+      "note": "祭司院预审，递交《南部水脉复流评估书》。"
+    },
+    "before_banquet": {
+      "file": "images/before-banquet.png",
+      "originalUploadName": "宴会前(2).png",
+      "note": "宴会前贵族寒暄。"
+    },
+    "tide_map": {
+      "file": "images/tide-map.png",
+      "originalUploadName": "平潮图(2).png",
+      "note": "看见《平潮图》。"
+    },
+    "copy_book": {
+      "file": "images/copy-stability-book.png",
+      "originalUploadName": "誊写(2).PNG",
+      "note": "誊写《潮汐稳定书》。"
+    },
+    "inn_room": {
+      "file": "images/azure-current-inn.png",
+      "originalUploadName": "你的酒馆对我打了烊(1).PNG",
+      "note": "回旅舍。"
+    },
+    "blue_note": {
+      "file": "images/blue-note.png",
+      "originalUploadName": "信的内容(3).PNG",
+      "note": "看见蓝蜡纸片内容。"
+    },
+    "conflict": {
+      "file": "images/conflict.png",
+      "originalUploadName": "conflict.png",
+      "note": "贵族刁难艾瑞克时切换。"
+    }
+  },
+  "globalRules": {
+    "protagonist": "艾莉丝·柯林斯",
+    "nameMap": {
+      "Lio": "利奥",
+      "Eric": "艾瑞克·奥西亚诺",
+      "Mira": "米拉"
+    },
+    "style": [
+      "第一视角，西方奇幻文学风格。",
+      "以对话推进为主，动作、视线变化和礼貌动作表现心理。",
+      "宫廷、祭司院、王庭场景要有暗流和制度压迫感。",
+      "不能跳剧情，不能提前透露后续章节。",
+      "玩家自定义行动必须有可感知影响，但主线要回收。"
+    ],
+    "bannedPatterns": [
+      "不是……而是……",
+      "目光/眼神 + 安静/复杂/温柔/深沉/像……",
+      "这句话说得很轻，像……",
+      "什么东西没有被接住",
+      "没有……也没有……",
+      "他只是/她只是……",
+      "像……又像……",
+      "连续排比"
+    ]
+  },
+  "stateKeys": [
+    "证据值",
+    "祭司警惕值",
+    "利奥信任值",
+    "艾瑞克注意度",
+    "女主暴露风险",
+    "静水宫线索进度"
+  ],
+  "screens": [
+    {
+      "id": "start_screen",
+      "type": "start",
+      "image": "images/start-screen.png",
+      "text": "",
+      "onClick": "loading_screen"
+    },
+    {
+      "id": "loading_screen",
+      "type": "loading",
+      "image": "images/loading-chapter1.png",
+      "text": "",
+      "onClick": "ch1_01_intro"
+    }
+  ],
+  "scenes": [
+    {
+      "id": "ch1_01_intro",
+      "type": "story",
+      "title": "背景介绍",
+      "image": "images/invitation-letter.png",
+      "text": "Chapter 1 剧情流程\n\n七日后，我必须前往王都 。这一纸调令送达南部水脉复核处时，上面盖着祭司院沉重的深蓝火漆。命令写得不容置疑：我，艾莉丝·柯林斯，必须在七日后亲自前往王都参加潮汐宴会，并递交由我复核的《南部水脉复流评估书》 。\n\n在庞大的王都官僚体系中，我不过是一个驻扎在边缘行省、身份低微的地方水脉复核官 。按常理，这样级别的官员绝无资格踏入那座象征最高权力的潮汐大厅 。\n\n然而，只有我清楚这道调令背后的寒意 。十七年前，那场被称为“第一次凝滞灾变”的灾难席卷水国，我的家族被冠以罪魁祸首的恶名，父母与兄长在一夜之间被秘密软禁，至今生死未卜 。若非当年一位曾欠下父亲人族老贵族冒死收留，我恐怕早已随家族一同消逝在历史的尘埃里 。\n\n这些年，我隐姓埋名，拼尽全力考入水脉复核处，唯一的目的就是追查当年的旧案 。我不知道他们被关在哪里，不知道他们是否还活着，但我绝不相信父亲会背叛这片土地 。\n\n在动身前往王都前，我必须拿到能够证明水脉异常的核心证据 。而这一切的突破口，就藏在南部地方档案室的旧纸堆里",
+      "next": "ch1_02_archive_start"
+    },
+    {
+      "id": "ch1_02_archive_start",
+      "type": "story",
+      "title": "第一幕：档案室旧图",
+      "image": "images/archive-lio.png",
+      "text": "第一幕：档案室旧图 地点：南部地方档案室。\n\n深夜，南部地方档案室 。 潮湿的空气里弥漫着陈旧纸页被水浸泡过的霉味 。风从一侧破损的拱窗灌进来，却怎么也吹不散这股粘稠的压抑感 。\n\n我手里提着一盏散发着微弱蓝光的水油灯 。我的同僚利奥转过身，将最后一摞沉重的旧档重重地搁在橡木长桌上，他的袖口已经沾了一层黑灰 。利奥合上一册修缮补录，疲惫地揉了揉太阳穴，指节在冰冷的皮质封面上停了停。\n\n“再看最后一摞。”他侧过头看了一眼紧闭的木门，声音低得像是一阵擦过石壁的微风 。他挪动脚步时，靴底在落满灰尘的橡木地板上拖出沉重的沙沙声，显然，连续数个沙漏时的毫无所获，已经将他微薄的耐心与勇气消磨殆尽。\n\n纸页边缘因为长年受潮而发软发烂，每翻动一页，都伴随着一股纸浆腐败的黏腻霉味。我的手指已经被泛黄的纸缘磨得失去了知觉，指甲缝里卡着擦不掉的黑灰。随着时间的推移，油灯里的水油一点点干涸，蓝光开始不祥地摇曳，将墙壁上那些古老的水纹符号拉扯出诡异的阴影。四周的黑暗仿佛在不断向中心压迫，寂静中只有我们彼此粗重的呼吸声。一次次的满怀希望，换来的只有一册又一册毫无关联的商贸税收与干旱记录。\n\n绝望像冰冷的水流，顺着脊椎一寸寸攀爬。利奥的动作开始变得粗暴，他甚至不再仔细辨认字迹，只是机械地重复着抬手、翻过、放下的动作。\n\n直到我将手探向最底层那一册无关的修缮补录。\n\n“有些不对劲。”我心想。周围的旧档因为常年受潮，纸页早就发软变形，唯独这一册的封皮偏新，甚至连边角都规整得有些刻意，就像是后来被人仓促间塞进这个角落的 。\n\n我的视线死死钉在那道异样的缝隙上，右手在半空中僵了半拍，随后指尖发紧，一把扣住了那册补录的边缘。我没有立刻抽出来，我的脖颈因为长时间的紧绷而有些僵硬，只能缓缓抬眼看向利奥。利奥的身形猛地一滞。他刚想抱怨的话语生生卡在喉咙里，原本习惯性弓着的背脊瞬间挺直。他没有说话，而是下意识地向后退了半步，可紧接着，他又像是想掩饰自己的失态一般，迅速上前，将桌上其他杂乱的档案往旁边挪开。他的动作比平时规矩了许多，甚至把散开的纸页一页页压平、对齐，像是在用这些细小的礼貌动作，死死遮掩自己逐渐加速的呼吸与内心的颤抖 。\n\n整个大厅安静得落字可闻。\n\n我收回视线，右手用力一抽，翻开补录册。\n\n“啪嗒。”\n\n一张对折的薄纸从冰冷的册页中间滑落出来 。那张纸很薄，折痕处有被反复压平的痕迹 。",
+      "next": "ch1_03_old_water_map_choice"
+    },
+    {
+      "id": "ch1_03_old_water_map_choice",
+      "type": "choice",
+      "title": "旧图异常",
+      "image": "images/old-water-map.png",
+      "text": "我松开握笔的左手，指尖压住纸角，缓缓将其展开 。水油灯的幽蓝光晕落上去，复杂的线条一点点显露出来——那是早已被宣告销毁的《南部旧水脉原图》 。图面一片模糊，布满了发黑的潮痕，许多本该清晰的水脉线被人刻意用药水晕开，透着一股欲盖弥彰的陈旧感 。我没有惊叫，只是呼吸不可避免地慢了一拍，喉咙里逸出一声极轻的、近乎叹息的气音 。\n\n利奥听到我的叹息后急忙凑上来，伸出另一只因为紧张而微微发颤的手指，在图纸的几个点上飞快地圈了圈 ：“艾莉丝，你看这里。这是南七回流井，还有这几个被覆盖的旧节点……它们在现行官图上根本不存在 ！”\n\n话音未落，他猛地收回手指，塞进衣袖里，眼神飞快地扫向档案室那扇紧闭的厚重铁门 。\n\n“我先说好，”利奥的声音压得极低，额角渗出一层细汗，他微微侧过身，用身体挡住油灯的光线，试图让自己看起来不那么扎眼 ，“我只是帮你找图，可不是陪你送命 。要是被祭司院的人发现我们私藏旧图，明天我们就会被冲进回流井里喂鱼。”\n\n我没有抬头，右手两指依然死死压着那张薄纸的边缘，左手却顺势抄起桌上一卷厚重的、落满灰尘的税收废档，不轻不重地朝他怀里扔了过去。“拿着，利奥大人。”我刻意放平了语调，用一种公事公办的古板语气低声回敬道，“把你的汗擦擦，要是掉在原图上洇了墨，祭司院还没来，你就先成了破坏文物的现行犯。\n\n利奥手忙脚乱地接住那卷废档，被激起的灰尘呛得低咳了一声。他一边用袖口泄愤似地在额头上抹了一把，一边瞪大眼睛，身体却配合地更往我这边靠了靠，用他那宽大的制服袍袖彻底死死挡住了水油灯投向窗外的一丝微光。\n\n“艾莉丝·柯林斯，你的良心是被西海岸的巨海蛇吞了吗？”利奥咬着牙，压低的声音里带着气声，连名带姓地念出我的名字来表达不满，“我是在担心文物吗？我是在担心我这条还没娶妻生子的命！下个月的薪水你必须请我去王都最好的小酒馆，否则明天一早我就去举报你私通旧水脉贼党。”\n\n“去小酒馆可以，但如果因为你现在的腿软导致我们被抓，”我微微侧过脸，借着蓝光瞥了他一眼，嘴角扯出一抹极淡的、带着嘲弄的弧度，“我想回流井里的鱼应该不挑食，它们会同时享用我们两个。”\n\n“你……”利奥气结，狠狠地翻了个白眼。可被我这么一怼，他原本紧绷得快要痉挛的肩膀反而垮了下来，下意识自卫的僵硬姿态松弛了不少。他用指节在桌面上轻轻敲了敲，发出“笃、笃”的细响，催促道：“行了，别贫了。快做决定，这鬼地方我一刻也不想多待。”\n\n玩笑的余温在冰冷的空气中迅速褪去，档案室里再次恢复了死寂 。那一唱一和的戏谑，不过是我们联手在这压抑的窒息感中凿出的一处气孔 。我的视线又重新落回那个被他圈出来的“南七回流井”上。【进入选择点1】",
+      "choice": {
+        "title": "选择点 1：旧图异常",
+        "stopAt": "女主发现《南部旧水脉原图》异常，利奥圈出南七回流井后，立刻停止。",
+        "options": [
+          {
+            "key": "A",
+            "label": "让利奥继续帮忙比对现行图。",
+            "effect": "证据更完整，但利奥风险上升。利奥会更紧张。"
+          },
+          {
+            "key": "B",
+            "label": "自己先记下南七回流井，避免牵连利奥。",
+            "effect": "利奥信任上升，风险降低，但女主掌握的信息少一点。"
+          },
+          {
+            "key": "C",
+            "label": "追查旧图右下角被刮掉的印记。",
+            "effect": "可以提前发现一点“旧副本痕迹”，但不能直接发现静水宫真相。"
+          },
+          {
+            "key": "D",
+            "label": "自定义行动。",
+            "effect": "允许玩家自定义，但必须遵守剧情锁。"
+          }
+        ],
+        "aiContext": {
+          "sceneSummary": "南部地方档案室深夜。艾莉丝和利奥在旧档中发现被藏起的《南部旧水脉原图》，利奥圈出“南七回流井”。",
+          "charactersPresent": [
+            "艾莉丝·柯林斯",
+            "利奥"
+          ],
+          "hardLocks": [
+            "场景必须停留在南部地方档案室。",
+            "不能提前写女主决定把南七回流井写进报告。",
+            "不能出现米拉、王都、祭司院、艾瑞克或静水宫暗印信息。",
+            "无论玩家如何行动，女主最终必须安全拿到《南部旧水脉原图》，并在心里决定把“南七回流井”写进递交王都的报告。",
+            "选择后自然切入第二幕：回家见米拉。"
+          ],
+          "reasonableActions": [
+            "用随身工具拓印",
+            "把原图藏进暗口袋",
+            "用言语安抚利奥"
+          ],
+          "overLimitActions": [
+            "用魔法隔空感应这口井的位置",
+            "当场断定家人在静水宫",
+            "直接毁掉整个档案室"
+          ]
+        },
+        "nextSceneId": "ch1_04_home_room"
+      }
+    },
+    {
+      "id": "ch1_04_home_room",
+      "type": "story",
+      "title": "第二幕：回家",
+      "image": "images/home-room.png",
+      "text": "第二幕：回家，Mira准备行装\n\n深夜的寒意在推开宅邸大门的瞬间被隔绝在外。空气中流动着凉爽的微风，带着水元素的清冽，以及长年不散的茉莉、雪松与麝香混合的沉静香气。这里温馨、精致，却又透着王公贵族府邸特有的冰蓝与清冷。\n\n米拉已经在等我了。\n\n长桌上，旅行用的衣物已被整齐叠好。通关文书依照我的习惯，最重要的一页被放在最上面；旁边的私人印章也被细心地转到了最适合我右手抓取的方向；几张容易洇墨的羊皮纸，更是被她用防水油纸另外包裹了一层。\n\n米拉是养父给我的贴身侍女。说是侍女，其实更像是母亲。她不会过多的干涉我的生活，只会默默地给我做好一切保障。\n\n“还没弄完？”我紧绷了一整晚的肩膀在看到她的那一刻终于软了下来，声音里带上了只有在她面前才会露出的娇憨。",
+      "next": "ch1_05_mira_hairpin"
+    },
+    {
+      "id": "ch1_05_mira_hairpin",
+      "type": "story",
+      "title": "米拉的银簪",
+      "image": "images/mira-hairpin.png",
+      "text": "米拉转过身，将一件外袍理平，随后从一旁的丝绒垫子上拿起了一枚新发簪。那是一枚银色的长簪，簪身上刻着极其细密流畅的水纹，做工比寻常的饰品要稳固扎实得多。我们的指尖隔着发簪短暂地碰了一下。米拉的手比我想象中凉，指节却用力，轻轻扶住簪身，没有立刻松开。我抬眼，正撞上她的视线。\n\n米拉看着我，她的拇指在簪尾那颗蓝石上轻轻摩挲了一下，随后才松手。\n\n我垂着眼，指尖捏着发簪尾端，蓝色晶坠在掌心晃了一下。我只觉得这枚发簪握在手里有些沉甸甸的，比普通的发簪略重一些。\n\n我的头发被旧潮门里的冷气吹得有些乱，几缕落在颈侧。我侧过身，微微低下头，顺从地轻声撒娇道：“米拉，帮我别上吧。”\n\n米拉走上前来，用指腹轻轻顺开我颈侧散落的碎发，她的动作很慢，就像过去十几年照顾我长大时一样自然。她什么也没多说，只把那些散乱的发丝一缕一缕拢回去，然后稳稳地将那枚银簪簪入我的发髻中。\n\n做完这一切，她看着我依旧因为思考而紧蹙的眉头，无奈地叹了口气，轻轻拍了拍我的肩膀。\n\n“去王都签字也要吃饭，也要睡觉。”她的台词一如既往的朴素，却带着让人安心的温度。\n\n我看着她，轻轻点了点头，在这片冰蓝梦幻却又充斥着温情的房间里，原本因旧图而悬起的心，终于得到了片刻的安宁。",
+      "next": "ch1_06_capital_road"
+    },
+    {
+      "id": "ch1_06_capital_road",
+      "type": "story",
+      "title": "第三幕：进入王都",
+      "image": "images/capital-road.png",
+      "text": "第三幕：进入王都\n\n潮汐宴会的前一天，马车在一片压抑的寂静中驶入了王都的外围。\n\n车轮碾在湿漉漉的青石板路上，发出沉闷的声响。车窗外，王都的轮廓在漫天水雾中若隐若现。我靠在冰冷的厢壁上，看着那些掠过的宏伟建筑，耳边仿佛又响起了这些年不绝于耳的窃窃私语——“柯林斯家族的罪人”、“凝滞灾变的始作俑者”。\n\n十七年了。小时候听到这些对父母和兄长的恶意诅咒，我曾愤怒地冲上去与人理论，扯破喉咙想告诉所有人他们不是罪魁祸首。但换来的只有无情的嘲弄与冰冷的排斥。后来，我不再争辩，甚至学会了在听到那些恶毒话语时露出得体的微笑。因为我终于明白，苍白的喊冤在既定的神权面前毫无用处，只有铁一样的证据，才能撕开这层虚伪的幕布。\n\n这次，我执意在《南部水脉复流评估书》中完整保留了“南七回流井”的异常数据。我很清楚，这份报告一旦递交，自己就等于将脖子送进了祭司院的绞索。这极度危险，但这种针刺般的危险感却让我的血液隐隐沸腾——越是危险，越证明我离当年的真相只有一步之遥。\n\n马车最终停在了外围的一家平民旅舍前。按照规矩，我们今晚必须在这里休整，第二天才去祭司院进行预审并赴宴。\n\n“通行凭证拿好，还有这份复核副本，别弄折了。”\n\n一进房间，利奥甚至顾不上擦掉外套上的水汽，就劈手夺过我的公文包，开始第无数次检查里面的文书。他这一路上欲言又止了十几次，\n\n“艾莉丝，我再说最后一次。”利奥猛地抬起头，平日里那副吊儿郎当的戏谑荡然无存，眼神里满是焦躁与克制的惊恐，“明天的预审，如果高阶祭司的眼神不对，或者他们开始盘问你图纸来源以外的事情……你立刻找借口推脱出来！大不了这个水脉官我们不做了。留着命，比什么都强。”\n\n看着他因为过度紧张而有些发颤的语调，我心里泛起一丝暖意。他不是个胆小鬼，如果他真的自私，早在档案室看到原图的那一刻就会去告发我，而不是陪我一路颠簸来到这狼窝的边缘。\n\n“我心里有数，利奥。”我伸手按住他正在整理文书的手，手心传过去的温度让他的动作顿了顿。我直视着他的眼睛，语气平静而笃定，“我不会白白去送死的。”\n\n翌日清晨。\n\n利奥没有资格进入核心区域，只能送到旅舍门口。\n\n我整理好制服的领口，跨出旅舍大门。在台阶前，我的脚步有了一个极其轻微的停顿。利奥站在门槛内，身体前倾，似乎本能地想要往前跟一步，可看了一眼街角隐约可见的祭司院巡逻卫兵，他的脚生生钉在了原地。\n\n我没有回头长篇大论地告别，只是在翻上马车前，微微侧过脸，隔着飘渺的水雾深深地看了他一眼。利奥迎着我的视线，嘴唇用力抿成一条直线，只是对我重重地点了点头。这一眼里的同僚情谊与担忧，比任何煽情的道别都要沉重。\n\n马车驶入王都的核心区域，空气中的水汽陡然变得浓郁而刺骨。\n\n这里的建筑大都由巨大的冷石砌成，地面的石砖被洗刷得没有一丝尘土，干净得近乎病态。街道两旁悬挂着由魔力驱动的银蓝色灯火，散发着没有温度的刺眼光芒。一辆辆装饰华丽、雕刻着繁复家徽的贵族马车从旁驶过，而每一辆马车的侧面，都无一例外地拓印着祭司院那神圣而沉重的波纹纹章。\n\n华丽，却冰冷彻骨。整座核心王都就像是一座被圣水反复冲洗、没有一丝污垢的巨大牢笼。\n\n两旁的银蓝灯火越发明亮，将我的马车影子在冷石地面上拉得极长。我靠在座位上，任由车窗外渗进来的清冷水汽扑在脸上。那些亮得刺眼的灯光无声地提醒着我：艾莉丝，从这一刻起，你的一举一动已经彻底暴露在祭司院的视线之中。\n\n但我没有闭眼。在这压抑到让人窒息的王都核心，我反而挺直了脊背，死死盯着前方祭司院高耸入云的尖顶。\n\n因为我知道，困扰了我十七年的黑暗答案，就在这片伪装成天堂的牢笼最深处。",
+      "next": "ch1_07_submit_report_choice"
+    },
+    {
+      "id": "ch1_07_submit_report_choice",
+      "type": "choice",
+      "title": "第四幕：祭司院预审报告",
+      "image": "images/submit-report.png",
+      "text": "第四幕：祭司院预审报告\n\n偏殿的空气比外面更冷一些。\n\n靴底碾过泛着幽冷光泽的冷石地面，每一声微小的摩擦都被高耸的石壁无限放大、拉长。这里的压迫感并不来自刀剑或高声斥责，而是来自一种近乎病态的、绝对的“规则感”。长案上的文书被码得整整齐齐，边缘与桌线平行，封印台上的神圣蓝蜡一字排开，连祭司们的座次、椅背的倾斜角度，都过分整齐得让人感觉连每一次呼吸都需要按照教条的墨线来裁剪。\n\n我没有四处张望，只是在极短的行进中默不作声地观察。主审高阶祭司的衣袖上绣着三道繁复的波纹纹章，代表着神权的绝对核心；封印台上的印章还带着未散的余热，文书依照呈递的行省严格按由南至北的顺序排列；墙壁上那些古老的水纹符号在冷光下泛着死寂的微茫。我不是出于好奇，而是在电光石火间判断着这间偏殿的权力边界与他们严苛的审查流程。\n\n就在这过分规整的静谧中，我一眼注意到了坐在偏殿灯火一侧的那个人————艾瑞克·奥西亚诺。\n\n他坐在那里，背脊直而不僵，手指松松搭在扶手上，目光垂向案上的文书。偏殿里的灯光经过水晶盏折射，落到他眉骨与鼻梁。我从他身上感到一种距离感，像一扇尚未开启的门：你知道门后有东西，却看不见里面，也不能贸然靠近。他坐在偏殿的灯下，衣领整齐，袖口平直，连手指搭在扶手上的角度都像被礼法裁过。祭司们说话时，他没有插言；记录官翻页时，他也没有抬眼。可正因为他什么都不做，周围的人反而下意识给他留出一小片空处。那不像退让，更像一种习惯性的分界。\n\n我只看了一眼，便收回视线。\n\n我走上前，将《南部水脉复流评估书》双手放到长案前，指尖压住封皮边缘，向两名祭司躬身行礼。\n\n负责翻阅文书的高阶祭司手指很稳，纸页在他的指腹下发出规律而冰冷的沙沙声。当他的视线落在报告中段的某处时，那沙沙声突兀地停了。\n\n“‘南七回流井’。”祭司轻轻吐出这个词，声音不高，没有任何暴怒或威胁的语调，像只是在纠正一个最普通的拼写错误。他抬起头看着我，“这口井十七年前已废，不属于现行水脉。删掉。”\n\n他的语气越平常，那股不容置疑的抹杀感就越发沉重，仿佛他只需要指尖轻轻一挥，就能把一条不该存在的历史记录从这世上彻底抹掉。方才那一瞬抬眼已经被艾瑞克收得干干净净。他的神色没有变化，手还停在旧图册边缘，指腹轻轻压着纸页，像只是顺手按住一张被风掀动的旧图。可我余光扫过时，仍看见他没有立刻翻页。\n\n祭司说“删掉”时，艾瑞克终于翻过那一页。\n\n那是一道极短、极快的目光交错，甚至连半个弹指的时间都不到。他抬眼，收回；我移开视线，恢复平静。没有多余的暧昧，也没有任何心跳的波澜，但在一片死寂的偏殿里，我知道那个被刻意抹去的词，同时触动了我们两个人——艾瑞克同样在意南七回流井。\n\n至于他是敌是友，他在此处的目的为何，我无法判断，也绝不敢在这个时候交付任何信任。所有的波澜，都只能被死死压在毫无波动的暗流之下。\n\n我没有激动，甚至连站姿都没有改变。我只是将右手从制服的长袖中抽出，轻轻按在报告的下缘，防止纸页被窗缝里漏进来的冷风掀起。\n\n我看着祭司，用一种公事公办的古板语气冷静地反问：“若已废弃，是否应登记入废井册？我来王都前，依例核对过现行图与旧存废井册，两处均无此井的注销记录。”\n\n我像是在核对一条再普通不过的文书流程，用他们最引以为傲的规则，去反问他们刻意制造的漏洞。\n\n偏殿里陷入了短暂而诡异的安静。\n\n记录官刚想落笔的手生生垂下，他把笔尖重新落回纸面，却迟迟没有写下一个字。另一名祭司端起手边的白瓷杯，杯盖在碰到杯沿时，发出极细、极清脆的一声脆响，在过分安静的房间里显得格外刺耳。\n\n主审祭司没有慌乱，他甚至还保持着得体的姿态，手腕轻放，那支沾了墨汁的银笔好整以暇地搁在指间。他静静地看着我，仿佛下一刻只要轻轻一划，就能决定这份报告、乃至于递交报告的这个人，该留下些什么，又该在这个世界上失去什么。\n\n“你查得很细。”\n\n过了几响，他缓缓开口，声音变得更轻、更柔和了。这句话听上去像是一句赞赏，可偏殿里的温度却随着他变轻的语调，骤然降到了冰点。【随后进入选择点2】。",
+      "choice": {
+        "title": "选择点 2：祭司要求删改",
+        "stopAt": "主审祭司递出羽毛笔，声音变轻说出“你查得很细”后，立刻停止。",
+        "options": [
+          {
+            "key": "A",
+            "label": "顺从删去井名，只留下原报告的异常表述。",
+            "effect": "正面风险降低，但祭司院会继续留意艾莉丝。"
+          },
+          {
+            "key": "B",
+            "label": "低头应下，观察艾瑞克是否还有反应。",
+            "effect": "确认艾瑞克听见了这个词，但无法判断立场。艾瑞克注意度小幅上升。"
+          },
+          {
+            "key": "C",
+            "label": "沉默修改，但记下祭司反应。",
+            "effect": "外部风险暂时降低，线索推进较慢。"
+          },
+          {
+            "key": "D",
+            "label": "自定义行动。",
+            "effect": "允许玩家自定义话术，但必须遵守剧情锁。"
+          }
+        ],
+        "aiContext": {
+          "sceneSummary": "祭司院西偏殿。艾莉丝递交《南部水脉复流评估书》，主审祭司要求删去“南七回流井”。艾瑞克也注意到这个词。",
+          "charactersPresent": [
+            "艾莉丝·柯林斯",
+            "主审高阶祭司",
+            "艾瑞克·奥西亚诺",
+            "记录官"
+          ],
+          "hardLocks": [
+            "场景不能离开祭司院西偏殿。",
+            "此时艾莉丝对艾瑞克只能判断为：他也注意到了这个词。",
+            "不能推进到信任、盟友、肢体接触、对视调情或静水宫。",
+            "艾瑞克可以开口，但只能围绕流程或权力边界，不能要走原稿，不能当场偏袒女主。",
+            "无论玩家如何周旋，女主最终必须表面顺从，用涂改液当场改掉“南七回流井”。",
+            "选择后自然切入第五幕：宴会厅贵族寒暄。"
+          ],
+          "reasonableActions": [
+            "装作古板官员死扣其他圣地律法",
+            "向艾瑞克递出隐蔽试探",
+            "示弱表示自己只是粗心抄错"
+          ],
+          "overLimitActions": [
+            "要求艾瑞克当场借王庭权力驳回祭司",
+            "抢夺文书",
+            "当场暴露家族真实身份"
+          ]
+        },
+        "nextSceneId": "ch1_08_before_banquet"
+      }
+    },
+    {
+      "id": "ch1_08_before_banquet",
+      "type": "story",
+      "title": "第五幕：宴会前的贵族寒暄",
+      "image": "images/before-banquet.png",
+      "text": "第五幕：宴会前的贵族寒暄\n\n走出偏殿，穿过几道高耸的石拱门，眼前的视野骤然开阔。\n\n大理石雕花大门在侍从的牵引下缓缓向两侧滑开，潮汐宴会的大厅宛如一片由银蓝冷光与虚伪笑意织就的精致深海。\n\n头顶上，无数盏由魔力驱动的银蓝色长灯高悬，投下没有一丝温度的刺眼光芒，将地面上铺设的繁复潮汐纹地毯映照得如波浪般缓缓流动。水晶酒杯在空气中发出一阵阵规律而清脆的碰撞声，伴随着刻意压低的长裙曳地声与低声笑谈，在大厅的穹顶下嗡嗡作响。空气里弥漫着极其浓郁的贵族香料味，却怎么也掩盖不住冷石地面下泛上来的森冷水汽。\n\n所有人都在笑，唇角的弧度完美得如同尺子量过，但没有人的眼睛是真正放松的。这根本不是一场庆典，而是一场盛大、体面且刀不血刃的精致围猎。\n\n我默默地退到一根雕花石柱的阴影里，手中端着一杯未动分毫的清醴，视线越过衣香鬓影的人群，再次落在了艾瑞克身上。\n\n作为奥西亚诺家族的王子，他的王室身份让他无法被忽视，可围在他身边的人又刻意没有给他真正的中心位置。那些贵族向他举杯、低头、称呼“殿下”，动作恭敬得无可挑剔，偏偏每个人都隔着恰到好处的半步。那半步的空隙，就像是一道无形的隔离带，将他生生孤立在热闹之外。\n\n一名年长的世袭贵族端着酒杯向艾瑞克走去，周围的谈笑声随之收窄。",
+      "next": "ch1_08_eric_conflict"
+    },
+    {
+      "id": "ch1_08_eric_conflict",
+      "type": "story",
+      "title": "第五幕：贵族刁难艾瑞克",
+      "image": "images/conflict.png",
+      "text": "第五幕：贵族刁难艾瑞克\n\n一名年长的世袭贵族端着金丝边酒杯缓缓走近，他袖口的金线在银蓝灯光下闪了一下，晃得人眼生疼。他先向艾瑞克欠身，礼数做得完整，唇边的笑也极尽温和，可一开口，吐出的字句却裹挟着淬毒的黏腻。\n\n“听闻殿下近来对王都那些失传的古水文颇感兴趣，整日待在偏殿的旧书堆里。也难怪，如今行省水脉交错，各处复核事务冗杂，祭司院自然会替陛下分忧，倒确实不该让这些凡俗琐事平白叨扰了殿下的清修。”\n\n老贵族微微眯起眼，语气里的“恭敬”几乎要溢出来，字里行间却明晃晃地将“清闲”与“架空”两个词狠狠砸在艾瑞克的脸上。\n\n话音落下，旁边围着的几位贵族心领神会，轻轻碰了碰杯。清脆的瓷响很小，像是不经意的附和。有人垂眼抿酒，有人把笑意压在杯沿后，另有人侧过脸与同伴交换了一瞬讥讽的眼神。每个人都在优雅地驻足，好整以暇地等着看这位被权力边缘化、只能去翻看无用古籍的王子殿下如何难堪。\n\n我握着杯子的手紧了紧，将身形往阴影里缩得更深，目光一动不动地注视着暗流中心。\n\n艾瑞克没有翻脸。他的背脊仍然端正，如同一柄立在风雪中的冰铸长剑。\n\n他的目光先落在老贵族的杯沿，随后缓慢地移到对方脸上。他眼睫微抬，握着水晶杯的手指极缓地收紧。偏殿灯火切出的冷淡阴影笼在他侧脸，让他整个人透出一种近乎神明俯瞰般的疏离。\n\n“公爵大人费心了。”艾瑞克缓缓开口，声音低沉而平稳，连一丝多余的波澜都没有，语气却像冰棱般锋利，“古水文虽然艰涩，但总归记录着神圣水脉最初的流向，不至于让人迷了来路。倒不似公爵大人的南境封地，因着上个季度那些‘不小心’漏报的矿税，近来让财政院上上下下连轴转了半个月，确实是……太劳神了些。”\n\n他表面上是在承接对方的讽刺，承认自己的清闲，实际上一句话便精准地挑出了老贵族私隐的死穴——他并非只是个在旧书堆里消磨时间的废人，哪怕被排挤在核心之外，他手里依旧攥着足以让这群蛀虫倾覆的把柄。\n\n老贵族端杯的手猛地僵在半空。\n\n整个小圈子里的空气瞬间死寂了一拍，几位正准备抿酒的贵族杯沿生生停在唇边，笑声突兀地断了。\n\n老贵族杯中的酒液剧烈晃了一下，几滴猩红的液体溅到了他的指背上。他很快从侍从的托盘里扯过帕子擦去，神神色有些狼狈，脸上的假笑迟了一拍才勉强接上。可他的下颌绷得很紧，帕子擦过指背时明显用了些力，指节处因过分隐忍而泛起了一点可怖的青白。\n\n我看得出来，他不服，且恨得咬牙切齿。只是艾瑞克这句话占尽了规矩，根本挑不出半分错漏，老贵族连一丝发作的理由都抓不到，只能生生将这口血咽下去。\n\n我站在远处的阴影里，借着酒杯的掩护，将这惊心动魄的一幕尽收眼底。\n\n我这时才真正注意到这位王子殿下。他的身份足够显眼，容貌也足够让人记住，可真正让我停下观察的，是他刚才那几句轻描淡写却重逾千钧的反击。贵族们敢用“清闲”公然试探他，说明他确实被祭司院和王权压在极度危险的权力边缘；但贵族被怼回去后只能打碎牙齿往肚里吞，说明艾瑞克·奥西亚诺的手里，仍然握着某些让他们见不得光、甚至极度忌惮的底牌。\n\n在这座精致的牢笼里，他不是一头待宰的羔羊，而是一只收敛了爪牙、随时准备将猎人喉咙咬碎的孤狼。\n\n而此时的我，正带着可能掀起滔天巨浪的“南七回流井”证据，被迫游走在这场随时会把人撕碎的权力棋局之中。",
+      "next": "ch1_09_tide_map_choice"
+    },
+    {
+      "id": "ch1_09_tide_map_choice",
+      "type": "choice",
+      "title": "第六幕：献潮礼与《平潮图》",
+      "image": "images/tide-map.png",
+      "text": "第六幕：献潮礼与《平潮图》\n\n大厅一端的古老洪钟沉重地鸣响了三声，浑厚的余音在挑高的穹顶下久久回荡，喧嚣的宴会厅瞬间如退潮般死寂下来。\n\n献潮礼正式开始。\n\n大厅正中央，繁复的防御法阵在地面上渐次亮起银蓝色的微光。在侍从们近乎严苛的唱名声中，身着华服的贵族们依照爵位高低排成一列长队，敛容屏气，依次走上高台。他们双手捧着一尊尊精雕细琢的“潮汐杯”，杯中盛着来自各自行省核心水脉的圣水。当他们躬身将圣水倾倒入法阵中央的白大理石凹槽时，杯中那些由魔力凝聚的流动水光便化作一缕缕细碎的银芒，没入大厅上方那幅缓缓展开的巨幅卷轴中。\n\n那是王庭圣物——《平潮图》。\n\n审高阶祭司站在图轴下方，展开厚重的羊皮教条，用一种近乎咏唱的空灵嗓音，向全场宣读着今年水国的全境水脉稳定情况。他的措辞极尽华美，赞颂着神明庇佑下的风调雨顺与永恒安宁。大厅中央，随着圣水的注入，那幅悬在半空的《平潮图》上，成百上千条代表各处水脉的银线开始规律地流动、交织，散发出璀璨而神圣的华光。\n\n底下的贵族们纷纷低头赞美，可站在角落里的我，看着那幅完美无瑕的图轴，心里却只感到一阵发冷的荒谬。太整齐了。那些银线的流速、汇聚的节点、甚至潮汐涨落的频率，都过分平稳得没有一丝波澜。真实的水脉是大自然的血肉，怎么可能如同神殿里被精密裁切的蜡烛一样，连一滴多余的泪都不落？\n\n这流光溢彩的“稳定”，不过是祭司院用神权粉饰出的太平盛世。\n\n我抬头，视线自上而下，一寸寸死死咬住那些流动的银色线条。当目光滑落到《平潮图》右下角的一处边缘时，我愣住了。\n\n那里的图轴上绘制着南部水系的终点，按规矩，应当用一层防御性质的金漆进行封边。可借着大厅里陡然大盛的银蓝灯火，我看到那片金漆的颜色极不均匀。外层是极其耀眼的纯金，但在那层新漆的边缘，隐约透出几抹干涸后微微发暗、泛着古旧古铜色的旧漆痕迹。我的呼吸陡然一紧，右脚的鞋底在冷石地面上极其沉重地向前踏出了一步。我的右手不知不觉间已经自制服的硬挺长袖中完全探出，五指张开，指尖因为过分渴望触碰那片金漆而隐隐发颤。\n\n然而，我的手指还未触及那幅卷轴的边缘，一柄雕刻着波纹纹章的银色祭司杖便无声地横在了我和《平潮图》之间。\n\n一抹冰冷的长袍衣角拂过我的脚面。不知何时，主审高阶祭司已经站在了我的身侧。他那宽大的兜帽微微低垂，挡住了大半张脸，只露出一截没有一丝血色的苍白下颌。\n\n“此图为王庭圣物，承载神圣平潮之源。”\n\n他的声音很轻，没有任何严厉的喝斥，甚至连语调都保持着方才咏唱时的优雅与平缓。但在说话时，苍白枯槁的右手极其缓慢地将祭司杖向上提起了一寸。这个看似毫无攻击性的礼貌举动，却带着一种近乎蛮横的、神权高高在上的威压，硬生生地将我伸出的右手逼得在半空中僵住。他周身散发出的那股被墨线剪裁得毫无差池的规则感，像是一堵无形的冰墙，冷酷地剥夺了我继续靠近的所有借口。【进入选择点3。】",
+      "choice": {
+        "title": "选择点 3：《平潮图》异常",
+        "stopAt": "主审祭司用身体挡住视线，体面地用规矩把女主拦在安全距离外后，立刻停止。",
+        "options": [
+          {
+            "key": "A",
+            "label": "假装整理衣袖，靠近观察。",
+            "effect": "能看得更清楚，但被祭司警惕。"
+          },
+          {
+            "key": "B",
+            "label": "借誊写文书的位置远距离判断。",
+            "effect": "安全，但线索较少。"
+          },
+          {
+            "key": "C",
+            "label": "询问旁边贵族这幅图的修补历史。",
+            "effect": "可能听到贵族闲谈，知道此图近几年曾被秘密修补。"
+          },
+          {
+            "key": "D",
+            "label": "自定义行动。",
+            "effect": "允许玩家自由发挥，但必须遵守剧情锁。"
+          }
+        ],
+        "aiContext": {
+          "sceneSummary": "潮汐宴会大厅。献潮礼开始，艾莉丝看见《平潮图》右下角金漆颜色不均，想靠近时被主审祭司拦住。",
+          "charactersPresent": [
+            "艾莉丝·柯林斯",
+            "主审高阶祭司",
+            "艾瑞克·奥西亚诺",
+            "贵族宾客"
+          ],
+          "hardLocks": [
+            "艾莉丝必须在潮汐宴会大厅中。",
+            "女主不能触摸《平潮图》，不能撕开或看透金漆，不能当场揭穿。",
+            "不能和艾瑞克产生超出宫廷礼仪的亲密互动。",
+            "无论玩家如何靠近或避让，女主都无法在这一幕看穿金漆。",
+            "仪式流程必须强制推进，进入誊写《潮汐稳定书》环节。"
+          ],
+          "reasonableActions": [
+            "借圣歌乐章移动到外围",
+            "向普通贵族套话",
+            "盯着祭司鞋尖假意道歉"
+          ],
+          "overLimitActions": [
+            "用魔法强行融化金漆",
+            "在宴会上大喊《平潮图》是假的",
+            "直接拉着艾瑞克潜入静水宫"
+          ]
+        },
+        "nextSceneId": "ch1_10_copy_book"
+      }
+    },
+    {
+      "id": "ch1_10_copy_book",
+      "type": "story",
+      "title": "第七幕：誊写《潮汐稳定书》",
+      "image": "images/copy-stability-book.png",
+      "text": "第七幕：誊写《潮汐稳定书》\n\n今晚的《潮汐稳定书》需要每一位到场的复核官誊写确认，这是无可逃避的铁律。\n\n当那册沉重的羊皮纸文书在记录官手中传过大半个长案，最终稳稳地停在我面前时，我便知道，这是我十七年来离深渊最近、也是离真相最近的一刻。\n\n我双手接过文书，指尖在触及那冰冷坚硬的封皮时，极其隐蔽地用力扣了一下。我没有像其他按部就班的官员那样慢条斯理地展平纸页，而是在将文书压在案上的极短瞬间，飞快地自上而下扫阅全书。那些繁复的政绩辞藻和规整的数字在我眼中化为一片虚妄的背景，我的每一寸视线，都化为了在极短时间内搜寻异常的犁。\n\n突然，我的视线定格在了文书右下角那圈用以装饰的繁复回形纹中。\n\n那里面藏着一道极淡、极细的水纹暗印。\n\n它绝非墨迹拓印，也非刻意绘制，而是用一种只有精通高阶水脉图校验的人才会使用的暗压手法，在纸张纤维深处留下的校验痕。若是不懂水脉秘术的普通贵族，只会将其当成纸张受潮后的天然纹理；可在我眼中，那几道交错的压痕却在银蓝灯火下呈现出一种诡异的清晰。\n\n暗印的内容是一行古水文：静水宫校验副本，南七回流井。\n\n我的右手猛地一滞。原本正在平稳下行的羽毛笔生生停在了半空中，尖锐的笔锋死死抵住羊皮纸面。\n\n现实的重压如排山倒海般砸来。我清晰地意识到自己停顿得太久了，在主审祭司那如鹰隼般锐利的目光下，任何超乎常规的迟疑都是自掘坟墓。\n\n但我无法移开视线，因为我的脑海中正掀起一场覆地翻天的海啸——我的家人，可能还活着。\n\n这绝非毫无根据的直觉。\n\n其一，那暗印里包裹的阵纹修补手法是柯林斯家族独有的秘传。小时候，我无数次看着母亲和舅舅在水脉图断裂处留下一种极细、带微弧的“回潮钩纹”，外人只当是普通的装饰，可只有我知道这是独属于家族的签名。\n\n其二，也是最致命的一点。这道副本上的维护痕迹根本不是十七年前的旧痕。压痕边缘清脆，周围甚至还残存着近几年才开始使用的、带有防潮蓝蜡成分的新墨痕与封印更新痕迹。\n\n这意味着，这个系统近年仍在被高频维护。那种普天之下绝无仅有的手法，只能说明一个事实——他们没有死，父母和兄长可能至今仍被关在某处，被迫为祭司院维护着庞大的旧水脉。\n\n这是困扰了我十七年的绝望深渊里，突然炸开的一点焦灼火种。\n\n我只是维持着悬在空中的笔尖，手腕的骨骼因强行静止而微微发硬。极短的时间内，那滴原本饱满的墨水终于承载不住重量，顺着钢笔的尖端坠落下去，在质地粗糙的羊皮纸上缓缓化开一团难看的漆黑墨渍。\n\n“复核官，你在看什么？”一道没有任何起伏的声音自我头顶上方幽幽砸落。\n\n主审高阶祭司不知何时已经悄无声息地挪步到了我的书写案前。那柄雕刻着波纹纹章的祭司杖在冷石地面上发出“笃”的一声闷响，宛如敲响的丧钟。\n\n紧张感在这一刻拉到了极致。周围贵族们的交谈声、酒杯碰撞的清脆响声仿佛在一瞬间被拉扯到了极远的天边，整个世界只剩下祭司那双在兜帽阴影下、正死死盯着我右手笔尖的枯涸眼睛。他没有发现暗印，但他敏锐地捕捉到了我这极不自然的停顿。\n\n指尖瞬间发紧。我被现实的危险猛地拽回，看着羊皮纸上那团已经洇开、几乎要将下一行字迹吞没的巨大墨渍，我的大脑在飞速运转。\n\n我不能抬头太快，那会显得心虚；我也绝不能再将视线在右下角的暗印上停留哪怕半个弹指。\n\n我深吸一口气，强行将眼底那毁灭性的情绪压入最深处的冰层之下。我极力保持着脊背的端正，顺从地将视线落回到正在誊写的行文格式上，假装自己只是迷失在某处古板的用词规范之中。\n\n我的嘴唇微微抿起，正准备用最无懈可击的官员流程，去搪塞眼前的致命审视。\n\n话还没完全出口，案侧传来一声很轻的合页声。艾瑞克放下了手中的水脉图册。那声音不重，却刚好落在祭司问话之后，在过分规整的寂静中显得清晰而突兀。偏殿里几名记录官的笔尖生生停住，连旁边侍从递水的动作也慢了半拍。\n\n我的手指微微一顿。我没有抬头，只从余光里看见艾瑞克在长椅上坐直了些。他的手从图册边缘移开，袖口压过手背，衣褶被抚得平直，银扣在冷光下亮了一瞬。他没有看我，目光平视着越过长案，沉沉地落在主审祭司面前那叠等待封印的誊写文书上。\n\n“今年誊写之后，是先由祭司院封印，还是先呈王庭留底？”这句话听上去不过是照例询问仪式流程，可“祭司院封印”与“王庭留底”两个词甫一脱口，便生生扣在了神权与王权长久以来最敏感的边界线上。\n\n主审祭司的身形一僵，原本死死锁在我笔尖上的视线，被迫在艾瑞克抛出这个问题的瞬间转移了过去。面对王庭的权力边界，哪怕是高阶祭司也无法坐视不理，他必须转过头去，用最规整的教条来回答这位王子殿下的质询。\n\n我错愕了一瞬，我原本以为自己在这座被水洗净的牢笼里只能孤军奋战，却怎么也没想到，这位刚刚在宴会厅里用旧矿税反刺老贵族的、看似被边缘化的王子，会在这个随时会见血的节骨眼上，主动将祭司的审视引向他自己。\n\n我没有任何迟疑，立刻抓住了这偷来的几秒钟。\n\n我强行压下情绪，逼迫自己把视线重新落回到正在誊写的正文行文上。左手死死抵住冰冷的案沿，右手重新握稳了羽毛笔，笔尖在羊皮纸上发出一声极其轻微、极其规律的沙沙声，仿佛我刚才的停顿，真的只是为了在这繁复的古文格式中寻找一个最稳妥的词组。\n\n等祭司用得体而空洞的教条敷衍完艾瑞克的问题，再次将目光扫回来时，我已经誊完了那一行。\n\n我低头蘸墨，借着低垂的眼睫死死遮住眼底的所有情绪。心口那阵因为确认家人存活而掀起的惊涛骇浪还没有完全退去，可呼吸已经重新回到了我能精准控制的节奏里。我将签好字的文书恭敬地向前推了一寸。\n\n祭司用那双枯涸的眼睛盯着我平静的侧脸看了片刻，最终，银笔在文书下缘划下一道冷酷的杠，算是放过了这次审查。\n\n在退下高台的那个极短瞬间，我的视线与艾瑞克有了极其短暂的交错。彼此都没有任何多余的表情，没有点头，没有致谢，更没有半点不该存在的暧昧。他的神色依旧隐在冷淡的阴影里，像一扇紧闭的门。我很快便移开了目光，转身快步离开了这处令人窒息的宴会中心。\n\n我不知道他刚才的开口究竟是看穿了暗印后的故意试探，还是纯粹为了在祭司院面前挑衅神权边界的巧合，亦或是某种更为隐蔽的交易的开端。在这片吃人的暗流里，我不敢交付一丁点信任。\n\n但我唯一能确认的是，他确实替我争取到了最致命的几秒钟。而那道暗印指引的“静水宫”与“南七回流井”，已经成了我在这座牢笼里活下去、并撕裂黑暗的唯一执念。",
+      "next": "ch1_11_return_inn"
+    },
+    {
+      "id": "ch1_11_return_inn",
+      "type": "story",
+      "title": "第十幕：回旅舍",
+      "image": "images/azure-current-inn.png",
+      "text": "第十幕：本章结尾\n\n走出祭司院偏殿的刹那，湿凉的夜风扑面而来，将大厅里那种黏稠的、带着窒息感的高压瞬间吹散了大半。\n\n直到这时，我紧绷了一整晚的肩膀才极其缓慢地松了下来，后知后觉地发现，掌心里早已浸出了一层冷汗。我抬起手，任由夜风将指尖的湿冷带走。\n\n但这一晚的涉险，让我彻底确认了三件事。\n\n首先，“南七回流井”不仅存在，而且是祭司院极力隐藏的禁忌；其次，静水宫的校验副本近年仍被高频维护，那上面有柯林斯家族独有的修补手法，这意味着十七年前被宣告死亡的父母与兄长，极有可能还活在这个世界的某个死角；最后，那个在偏殿里连手指搭在扶手上的角度都像被礼法裁过的王子，艾瑞克·奥西亚诺，他也在盯着这件事。\n\n我并没有触及完整的真相，只是在黑暗中摸索到了它冰冷而锋利的边缘。心口深处，十七年来第一次燃起了一点滚烫的希望，但我也比任何时候都清楚，这希望背后的深渊随时能将我粉碎。\n\n回外围旅舍的路上，马车在薄雾中摇晃。\n\n远离了核心王都那些刺眼的银蓝色灯火，街角的魔力路灯显得温和而黯淡。我靠在厢壁上，马车慢悠悠地前行，闭上眼，任由清冷的水汽扑在脸上，在这段远离审视的路途里，从高压中短暂地喘了一口气。\n\n平民旅舍的房间内，一推开门，烛火便在暗处晃了晃。\n\n利奥坐在那张缺了角的桌边，一见我进来，他整个人猛地站起身，几步抢到我面前，眼神在我身上上下打量。在确认我制服齐整、没有带伤后，他才稍微松了一口气，但紧接着他便向前迈出半步，下意识地压低了声音。\n\n“你看见什么了？”利奥死死盯着我，眼底的关切与焦躁交织在一起，连问话的语调都带着微微的颤。\n\n“一口不该存在的井。”我没有把偏殿和宴会上的暗流全部倒出来。\n\n利奥原本吸了一口气，似乎想借着安全回来的由头狠狠骂我几句，可见我平安回来，那些埋怨的话语到了嘴边又被他生生咽了下去。\n\n夜渐深，王都外围的市井喧嚣彻底散去，平民旅舍陷入了一种过分安静的沉寂。\n\n原本令人安心的寂静，在此时却像是某种悄然贴近的阴影，一寸寸将房间包裹。蜡烛的火苗在没有风的屋子里规整地跳跃，将墙上的阴影拉得极长。\n\n“笃，笃。”\n\n极轻的两声叩击，突兀地在紧闭的木门上响起。\n\n声音太小、也太轻了，不带任何正式拜访的力度，倒像是有人刻意收敛了力道，用指节在厚重的木板上进行着某种极度克制的试探。\n\n正坐在床边整理斗篷的利奥肩膀猛地一僵。他本能地警觉起来，右手闪电般探出，一把按住了桌上的灯罩，掌心用力，房间里的光线瞬间暗下去一半。在一片昏暗的阴影里，他那双布满血丝的眼睛立刻死死看向我，一言不发。\n\n我们之间没有交谈，一个眼神的对视便完成了默契。\n\n我放轻了脚步，猫着腰，光脚踩在冰冷的木地板上，没有发出半点声响。我走到门边，右手没有去碰木质的门闩，而是将侧脸极其缓慢地贴近了冰冷的门缝。\n\n等待。\n\n门外没有衣料摩擦的沙沙声，没有沉重的呼吸声，甚至连靴底挪动的微小动静都没有。这种死一样的寂静，比暴烈地破门而入更让人脊背发凉。确定没有任何潜伏的杀意后，我这才伸出两指，极缓、极慢地拉开了门闩。\n\n木门发出极轻的“吱呀”声，向内滑开。\n\n走廊上空荡荡的，只有墙壁上悬挂的油灯在冷风里轻轻晃动，投下几道扭曲的阴影。没有任何人影，快得仿佛刚才那两下试探的叩门声只是我紧绷神经下产生的幻觉。\n\n“门下。”利奥沙哑的声音从我身后极低地传过来，带着一丝紧绷的颤音。\n\n我顺着他的视线低头。\n\n一截极其薄脆的淡蓝色纸片，正静静地压在门缝处的阴影里。纸片的材质极其特殊，表面覆盖着一层细腻的蓝蜡，而在那蓝蜡的边缘，此时还残留着一点正在逐渐微弱的、潮湿的银色光芒——那是某种高阶封印或传讯魔法刚刚脱落时遗留的残屑。\n\n我弯下身，指尖刚触碰到那张带有魔法感却绝不花哨的纸面，那一抹残存的银光便如同融化的冰雪一般，在我指腹下彻底淡了下去，重归死寂。",
+      "next": "ch1_12_blue_note_choice"
+    },
+    {
+      "id": "ch1_12_blue_note_choice",
+      "type": "choice",
+      "title": "蓝蜡纸片",
+      "image": "images/blue-note.png",
+      "text": "纸片很窄，上面只有一行为墨水洇透、字迹却极其苍劲健拔的古水文：\n\n“明日晨钟第三响，旧潮门。”\n\n利奥的脸色在看清那行字的一瞬间彻底变了。他的身体本能地向门外的黑暗中探了探，又飞快地缩了回来，声音压得极低，甚至带上了一丝咬牙切齿的战栗：“谁放的？这王都里还有谁会用这种高阶的蓝蜡封印？”\n\n他的问题，也正是我此时心中升腾而起的寒意。\n\n我没有立刻回答他。我的双手极稳地将那张纸片翻到了背面。背面干干净净，没有半点署名，没有贵族纹章，更没有留下任何可以用来追踪魔力残留的追查印记。\n\n进入【选择点4】",
+      "choice": {
+        "title": "选择点 4：蓝蜡纸片处理",
+        "stopAt": "艾莉丝在旅舍门缝下捡起并看清蓝蜡纸片：明日晨钟第三响，旧潮门。",
+        "options": [
+          {
+            "key": "A",
+            "label": "暂时隐瞒纸片内容，只告诉利奥有人盯上了自己。",
+            "effect": "降低利奥卷入程度，但他会察觉艾莉丝有所保留。"
+          },
+          {
+            "key": "B",
+            "label": "把纸片内容告诉利奥，让他明日留在外围接应。",
+            "effect": "利奥信任上升，但他会更焦虑，也更可能被牵连。"
+          },
+          {
+            "key": "C",
+            "label": "先检查蓝蜡纸片残留的封印痕迹。",
+            "effect": "可能获得有限的封印信息，但不能追踪到送信人。"
+          },
+          {
+            "key": "D",
+            "label": "自定义行动。",
+            "effect": "允许玩家自定义处理纸片，但必须遵守剧情锁。"
+          }
+        ],
+        "aiContext": {
+          "sceneSummary": "王都外围平民旅舍。夜深人静，门外传来轻叩，艾莉丝和利奥在门缝下发现蓝蜡纸片，上面写着“明日晨钟第三响，旧潮门”。",
+          "charactersPresent": [
+            "艾莉丝·柯林斯",
+            "利奥"
+          ],
+          "hardLocks": [
+            "不能直接识破送信人是谁。",
+            "不能断定这是艾瑞克送的。",
+            "不能当晚冲去旧潮门。",
+            "不能用纸片直接定位静水宫。",
+            "如果玩家试图术法反向追踪，纸片银光会彻底熄灭。",
+            "无论玩家隐藏还是销毁原件，女主只能确认：宴会上不止她一个人看见了暗印。",
+            "第一章在确认“旧潮门”为下一入口后结束，生成存档。"
+          ],
+          "reasonableActions": [
+            "将纸片藏入米拉送的银簪暗格",
+            "让利奥记下字迹后用烛火销毁",
+            "用普通羊皮纸誊抄一份留底"
+          ],
+          "overLimitActions": [
+            "立刻开门在黑夜里施展追踪术",
+            "在旅舍大喊抓贼"
+          ]
+        },
+        "nextSceneId": "chapter1_archive"
+      }
+    },
+    {
+      "id": "chapter1_archive",
+      "type": "archive",
+      "title": "Chapter 1 章节结束存档",
+      "image": "images/blue-note.png",
+      "text": "第一章结束后，请根据玩家在四个选择点的实际行为生成可复制存档。存档只保留下一章必须承接的信息：玩家风格、本章关键选择、人物态度、线索进度、外部风险、下一章入口。",
+      "archiveTemplate": {
+        "title": "【《水国旧案》Chapter 1 存档】",
+        "fields": [
+          "玩家风格：[谨慎 / 试探 / 冒险 / 保护同伴 / 借势]",
+          "本章关键选择：",
+          "1. 旧图异常：[填写]",
+          "2. 祭司要求删改：[填写]",
+          "3. 《平潮图》异常：[填写]",
+          "4. 蓝蜡纸片处理：[填写]",
+          "人物态度：",
+          "利奥：[信任变化 / 风险状态]",
+          "艾瑞克：[注意度 / 暂无信任或合作]",
+          "祭司院：[警惕程度]",
+          "核心线索：南七回流井存在；静水宫校验副本存在；柯林斯家族修补手法近年仍出现；旧潮门成为下一入口。",
+          "下一章承接：明日晨钟第三响，旧潮门。"
+        ]
+      }
+    }
+  ],
+  "apiUsageRule": {
+    "fixedStory": "scenes[].text 由前端直接显示，不发给 AI。",
+    "whenToCallAI": "只有 type === 'choice' 且玩家选择 D 或需要生成选项后果时，才调用 API。",
+    "sendToAIOnly": [
+      "当前 scene.id",
+      "scene.choice.aiContext",
+      "玩家选择或自定义行动",
+      "少量后台状态",
+      "globalRules 的精简版"
+    ],
+    "doNotSendToAIEveryTime": [
+      "整章全文",
+      "所有图片 prompt",
+      "未出场人物设定",
+      "后续章节剧情"
+    ]
+  }
+};
+
+
+const startScreen = document.getElementById('startScreen');
+const loadingScreen = document.getElementById('loadingScreen');
+const game = document.getElementById('game');
+const storyImage = document.getElementById('storyImage');
+const imageTitle = document.getElementById('imageTitle');
+const storyBox = document.getElementById('storyBox');
+const nextBtn = document.getElementById('nextBtn');
+const choiceBox = document.getElementById('choiceBox');
+const customBox = document.getElementById('customBox');
+const customInput = document.getElementById('customInput');
+const customSubmit = document.getElementById('customSubmit');
+const progressNote = document.getElementById('progressNote');
+const saveBtn = document.getElementById('saveBtn');
+const loadBtn = document.getElementById('loadBtn');
+
+const scenes = storyData.scenes || [];
+const sceneMap = new Map(scenes.map(s => [s.id, s]));
+const API_URL = location.protocol === "file:"
+  ? "http://localhost:8787/api/choice"
+  : "/api/choice";
+
+let currentId = (storyData.screens?.[1]?.onClick) || scenes[0]?.id;
+let historyChoices = [];
+let selectedChoice = null;
+let pendingNextId = null;
+let isGenerating = false;
+let hasEnteredGame = false;
+
+// 隐藏数值：玩家看不到，但每次选择都会发给 AI，用来影响剧情走向
+let playerStats = {
+  "证据值": 0,
+  "祭司警惕值": 0,
+  "利奥信任值": 0,
+  "艾瑞克注意度": 0,
+  "女主暴露风险": 0,
+  "静水宫线索进度": 0
+};
+
+function highlight(text){
+  const keys = ['南七回流井','静水宫','平潮图','暗印','旧潮门','南部旧水脉原图','潮汐稳定书','艾瑞克','利奥','米拉'];
+  let safe = text
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  for(const k of keys){
+    safe = safe.replaceAll(k, `<span class="blueKey">${k}</span>`);
+  }
+  return safe;
+}
+
+function paragraphs(text){
+  return (text || '')
+    .split(/\n{2,}|\n/)
+    .map(t => t.trim())
+    .filter(Boolean)
+    .map(t => `<p>${highlight(t)}</p>`)
+    .join('');
+}
+
+function preloadImage(src){
+  return new Promise(resolve => {
+    if(!src) return resolve();
+    const img = new Image();
+    img.onload = resolve;
+    img.onerror = resolve;
+    img.src = src;
+  });
+}
+
+function preloadChapterAssets(){
+  const imageSet = new Set();
+
+  Object.values(storyData.imageManifest || {}).forEach(item => {
+    if(item?.file) imageSet.add(item.file);
+  });
+
+  scenes.forEach(scene => {
+    if(scene.image) imageSet.add(scene.image);
+  });
+
+  return Promise.allSettled([...imageSet].map(preloadImage));
+}
+
+function renderScene(id){
+  const scene = sceneMap.get(id) || scenes[0];
+  if(!scene) return;
+  currentId = scene.id;
+  selectedChoice = null;
+  pendingNextId = null;
+  storyImage.src = scene.image || '';
+  imageTitle.textContent = scene.title || '';
+  if(scene.type === 'archive'){
+    renderArchive(scene);
+  } else {
+    storyBox.innerHTML = `<h2>${scene.title || ''}</h2>${paragraphs(scene.text)}`;
+  }
+  storyBox.scrollTop = 0;
+  choiceBox.innerHTML = '';
+  customBox.style.display = 'none';
+  if(scene.type === 'choice' && scene.choice){
+    nextBtn.style.display = 'none';
+    renderChoices(scene);
+  } else {
+    choiceBox.style.display = 'none';
+    nextBtn.style.display = scene.type === 'archive' ? 'none' : 'block';
+    nextBtn.textContent = scene.next ? '继续' : '章节结束';
+  }
+  const idx = scenes.findIndex(s => s.id === scene.id) + 1;
+  progressNote.textContent = `Chapter 1 · ${idx}/${scenes.length}`;
+}
+
+function renderChoices(scene){
+  choiceBox.style.display = 'flex';
+  const title = document.createElement('div');
+  title.className = 'choiceTitle';
+  title.textContent = scene.choice.title || '请选择行动';
+  choiceBox.appendChild(title);
+  (scene.choice.options || []).forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'choiceBtn';
+    btn.innerHTML = `<strong>${opt.key}.</strong> ${opt.label}`;
+    btn.onclick = () => chooseOption(scene, opt);
+    choiceBox.appendChild(btn);
+  });
+}
+
+function setGenerating(flag){
+  isGenerating = flag;
+  const buttons = choiceBox.querySelectorAll('button');
+  buttons.forEach(btn => btn.disabled = flag);
+  customSubmit.disabled = flag;
+  nextBtn.disabled = flag;
+  if(flag){
+    progressNote.textContent = "AI 正在根据你的选择生成剧情……";
+  } else {
+    const idx = scenes.findIndex(s => s.id === currentId) + 1;
+    progressNote.textContent = `Chapter 1 · ${idx}/${scenes.length}`;
+  }
+}
+
+function buildChoicePayload(scene, opt, customText=''){
+  return {
+    chapterId: storyData.id,
+    chapterTitle: storyData.title,
+    protagonist: storyData.globalRules?.protagonist,
+    globalRules: storyData.globalRules,
+    sceneId: scene.id,
+    sceneTitle: scene.title,
+    sceneSummary: scene.choice?.aiContext?.sceneSummary || "",
+    stopAt: scene.choice?.stopAt || "",
+    aiContext: scene.choice?.aiContext || {},
+    choice: {
+      key: opt.key,
+      label: opt.label,
+      effect: opt.effect || "",
+      customText: customText
+    },
+    playerStats,
+    recentChoices: historyChoices.slice(-6),
+    saveContext: window.WaterGameSaves
+      ? window.WaterGameSaves.buildAiContext(storyData.id)
+      : {previousChapters: []},
+    nextSceneId: scene.choice?.nextSceneId || scene.next || null,
+    outputRules: {
+      customInputLimit: "玩家自定义行动最多20个字，超过则不允许提交。",
+      storyLength: "AI返回的 story 正文必须控制在200到400个中文字符之间；只写当前选择后的即时后续，不写长篇总结，不提前跳到下一幕。",
+      displayRule: "前端只展示 story 和 nextHint；隐藏数值不展示给玩家。"
+    }
+  };
+}
+
+function saveCurrentChapterState(options = {}){
+  if(!window.WaterGameSaves) return null;
+  const payload = {
+    chapterId: storyData.id,
+    title: storyData.title,
+    label: "Chapter 1",
+    currentSceneId: options.currentSceneId || currentId,
+    playerStats,
+    historyChoices
+  };
+  if(options.archiveText !== undefined) payload.archiveText = options.archiveText;
+  if(options.completed !== undefined) payload.completed = options.completed;
+  if(options.lastGeneratedStory !== undefined) payload.lastGeneratedStory = options.lastGeneratedStory;
+  return window.WaterGameSaves.saveChapterState(payload);
+}
+
+function createChoiceRecord(scene, opt, customText, data, source){
+  return {
+    chapterId: storyData.id,
+    sceneId: scene.id,
+    sceneTitle: scene.choice?.title || scene.title,
+    key: opt.key,
+    label: opt.label,
+    customText,
+    generatedStory: data.story || "",
+    nextHint: data.nextHint || "",
+    styleTag: data.styleTag || [],
+    newStats: data.newStats || {},
+    source
+  };
+}
+
+function rememberChoice(scene, opt, customText, data, source){
+  const record = createChoiceRecord(scene, opt, customText, data, source);
+  historyChoices.push(record);
+  saveCurrentChapterState({
+    currentSceneId: pendingNextId || currentId,
+    lastGeneratedStory: record.generatedStory
+  });
+}
+
+function statValue(stats, key){
+  return Number(stats?.[key] ?? 0);
+}
+
+function createLocalChoiceStory(scene, opt, customText=''){
+  const key = opt.key || 'A';
+  const action = (customText || opt.label || '继续观察').trim();
+  const customAction = customText
+    ? `我照着自己的判断行动：${customText}。`
+    : `我没有照着既定选项走，而是选择了更贴合当下局势的做法。`;
+  const stories = {
+    ch1_03_old_water_map_choice: {
+      A: `我让利奥把现行图也摊开，两张图在幽蓝灯下并排展开。利奥嘴上抱怨，手却比任何时候都稳，他用旧档边角压住纸页，逐一核对那些被抹去的节点。南七回流井的位置在两张图之间形成一块刺眼的空白，越比对，越能看出有人故意让它从官图上消失。我把差异记入随身小册，只留下最普通的修缮编号作掩护。`,
+      B: `我没有继续扩大动静，而是先把旧图收进防水油纸里。利奥愣了一下，很快明白我的意思，立刻把无关税档重新堆回原位。我们没有得到更多线索，却保住了这张图本身。离开档案室前，我回头看了一眼那排潮湿的旧柜，心里清楚，真正危险的不是找到证据，而是带着证据活到王都。`,
+      C: `我压低声音追问利奥是否见过这类涂改方式。他一开始想否认，视线却不自觉落到图纸边缘那些发黑的潮痕上。过了片刻，他才说这种药水不像地方档案室能拿到的东西，更像祭司院封存旧图时使用的洗墨剂。这个判断不能当作证词，却足以说明南七回流井的消失并非普通誊写错误。`,
+      D: `${customAction}利奥被我的决定惊了一下，却没有拆台，只把灯芯拨得更暗。旧图在微光里显得脆弱而危险，我把行动控制在不惊动守夜人的范围内，让新的线索与原图一起留下可追溯的痕迹。无论这个做法多冒险，结论都无法回避：南七回流井被人从现行记录中抹掉了。`
+    },
+    ch1_07_submit_report_choice: {
+      A: `我继续用废井册的流程追问，没有提高声音，也没有让自己显得愤怒。主审祭司的银笔停在纸面上，记录官的笔尖却迟迟没有落下。规则被我摆回长案中央，他们一时不能用一句“删掉”把漏洞盖过去。可我也看见祭司兜帽下的下颌绷紧，明白这份谨慎已经让他们记住了我。`,
+      B: `我低头应下，指尖按住报告边缘，像一个被教条说服的地方官。余光里，艾瑞克翻页的动作慢了一瞬，那一瞬短得几乎无法被旁人察觉，却足够让我确认他听见了“南七回流井”。我没有继续试探，只把这点反应藏进心里，任由涂改液覆盖那几个危险的字。`,
+      C: `我示弱地承认可能是地方旧档误录，语气放得平稳而恭顺。祭司没有立刻放松，反而审视着我递过去的报告，像是在判断这份退让是否太过及时。我用最普通的官员礼节承接他的目光，让自己看起来只是害怕担责，而不是正在隐藏真正的旧图。`,
+      D: `${customAction}长案边的空气骤然收紧，记录官停笔，祭司的视线也随之转向我。我把这个动作收束在官员礼仪能够容纳的范围内，没有让它变成公然对抗。即便如此，报告上的“南七回流井”仍被迫删去；但这一次，我带走的不只是挫败，还有艾瑞克与祭司院同时被触动的证据。`
+    },
+    ch1_09_tide_map_choice: {
+      A: `我借整理衣袖向前半步，目光没有直盯金漆，而是从图轴边缘的阴影扫过去。那几抹古旧铜色在新金漆下短暂显形，像被仓促盖住的旧伤。祭司杖很快横到我面前，我立刻停下，顺从地退回安全距离。看得不够彻底，却已经足够确认：《平潮图》的边缘近年被人动过。`,
+      B: `我没有靠近图轴，而是借誊写席的位置远远判断。灯火每一次晃动，右下角的金漆都会露出不自然的厚薄差。这个距离看不清底层纹路，却能避开祭司正面警惕。我把异常位置记成礼仪流程里的一个普通方位，等到文书传到手边时，再寻找能与它互证的痕迹。`,
+      C: `我转向旁边一位正低声议论的贵族，用最无害的语气提起《平潮图》的修补工艺。对方起初只想卖弄见识，说到近年王庭曾秘密召工匠入宫时却忽然收住话头。他很快用酒杯挡住嘴角，仿佛刚才只是闲谈。可那一截被掐断的话，已经把“秘密修补”四个字送到了我手里。`,
+      D: `${customAction}这个举动让周围的礼节节奏轻微错开，祭司的注意力也随之压来。我没有强行触碰圣物，只把能观察到的细节留在脑中：新漆过亮，旧痕未净，南部水系的终点被处理得过分干净。主线仍被仪式推着向前，但《平潮图》的异常已经无法从我的判断里抹去。`
+    },
+    ch1_12_blue_note_choice: {
+      A: `我没有立刻把纸片内容告诉利奥，只说有人已经盯上了我。利奥的脸色沉下去，显然听出了我有所保留，却没有逼问。他开始检查门锁与窗缝，把焦躁压进实际行动里。我把蓝蜡纸片贴身收好，心里清楚，这份隐瞒能暂时把他挡在危险外，却也会在我们之间留下新的裂隙。`,
+      B: `我把纸片递给利奥，让他看清那行古水文。短暂的沉默后，他低声骂了一句，声音却没有乱。他要求明天留在外围接应，又把旧潮门周围的街巷在桌上画出来。告诉他意味着把他拖近危险，但也让我们第一次不再各自承担恐惧。烛火晃动时，我看见他已经做出了留下的决定。`,
+      C: `我先检查蓝蜡边缘残留的封印痕迹。银光在指腹下迅速熄灭，没有留下可追踪的方向，只剩一种极细的潮湿冷意。它不像普通贵族能用的传讯术，却也无法直接证明来自艾瑞克。我把这点判断告诉利奥：送信人身份仍被遮住，但对方一定看见了宴会上的暗流。`,
+      D: `${customAction}纸片上的银光随我的处理渐渐暗下去，房间里只剩利奥压低的呼吸声。我没有得到送信人的名字，却让这条线索以更适合自己的方式留下。无论保存、誊抄还是销毁原件，真正无法改变的是那行古水文：明日晨钟第三响，旧潮门。`
+    }
+  };
+  return stories[scene.id]?.[key] || `${customAction}这个选择改变了现场的节奏，也让旁人的反应露出短暂缝隙。我没有急着把线索说破，而是顺着当前局势把风险收束回自己能控制的范围。等喧声重新覆盖过来时，我已经把新的细节记牢，准备继续沿着主线往前走。`;
+}
+
+function createBrowserFallbackResponse(scene, opt, customText=''){
+  const risky = opt.key === 'C' || opt.key === 'D';
+  const careful = opt.key === 'A' || opt.key === 'B';
+
+  return {
+    story: createLocalChoiceStory(scene, opt, customText),
+    newStats: {
+      ...playerStats,
+      "证据值": statValue(playerStats, "证据值") + (careful ? 1 : 2),
+      "祭司警惕值": statValue(playerStats, "祭司警惕值") + (risky ? 1 : 0),
+      "艾瑞克注意度": statValue(playerStats, "艾瑞克注意度") + (opt.key === 'B' ? 1 : 0),
+      "女主暴露风险": statValue(playerStats, "女主暴露风险") + (risky ? 1 : 0)
+    },
+    styleTag: risky ? ['试探', '冒险'] : ['谨慎', '保护同伴'],
+    nextHint: '当前没有连接到 AI 后端，已使用本地备用剧情继续主线。'
+  };
+}
+
+async function chooseOption(scene, opt){
+  if(isGenerating) return;
+  selectedChoice = opt;
+
+  if(opt.key === 'D'){
+    customBox.style.display = 'flex';
+    storyBox.innerHTML += `<p><span class="blueKey">【自定义行动】</span>请在右侧输入。AI 会根据当前剧情锁、人物关系和隐藏数值生成反馈。</p>`;
+    storyBox.scrollTop = storyBox.scrollHeight;
+    return;
+  }
+
+  await requestAIConsequence(scene, opt, "");
+}
+
+async function requestAIConsequence(scene, opt, customText=''){
+  pendingNextId = scene?.choice?.nextSceneId || scene?.next || null;
+  choiceBox.style.display = 'none';
+  customBox.style.display = 'none';
+  nextBtn.style.display = 'none';
+
+  const loadingId = `loading-${Date.now()}`;
+  storyBox.innerHTML += `<p id="${loadingId}"><span class="blueKey">【${opt.key}】</span>正在生成这一选择带来的剧情变化……</p>`;
+  storyBox.scrollTop = storyBox.scrollHeight;
+
+  setGenerating(true);
+
+  try{
+    const res = await fetch(API_URL, {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify(buildChoicePayload(scene, opt, customText))
+    });
+
+    if(!res.ok){
+      throw new Error(`后端返回错误：${res.status}`);
+    }
+
+    const data = await res.json();
+    const loadingNode = document.getElementById(loadingId);
+    if(loadingNode) loadingNode.remove();
+
+    const story = data.story || "AI 没有返回剧情。";
+    const sourceLabel = data.fallback ? "本地备用剧情" : "AI生成剧情";
+    storyBox.innerHTML += `<p><span class="blueKey">【${sourceLabel}】</span></p>`;
+    storyBox.innerHTML += paragraphs(story);
+
+    if(data.nextHint){
+      storyBox.innerHTML += `<p><span class="blueKey">【线索余波】</span>${highlight(data.nextHint)}</p>`;
+    }
+
+    if(data.newStats && typeof data.newStats === 'object'){
+      playerStats = {...playerStats, ...data.newStats};
+    }
+
+    rememberChoice(scene, opt, customText, data, data.fallback ? "local_fallback" : "ai");
+
+  } catch(err){
+    const loadingNode = document.getElementById(loadingId);
+    if(loadingNode) loadingNode.remove();
+
+    const data = createBrowserFallbackResponse(scene, opt, customText);
+    storyBox.innerHTML += `<p><span class="blueKey">【浏览器本地剧情】</span></p>`;
+    storyBox.innerHTML += paragraphs(data.story);
+
+    if(data.nextHint){
+      storyBox.innerHTML += `<p><span class="blueKey">【本地模式】</span>${highlight(data.nextHint)}</p>`;
+    }
+
+    if(data.newStats && typeof data.newStats === 'object'){
+      playerStats = {...playerStats, ...data.newStats};
+    }
+
+    rememberChoice(scene, opt, customText, data, "browser_fallback");
+
+    console.error(err);
+  } finally {
+    setGenerating(false);
+    nextBtn.style.display = 'block';
+    nextBtn.textContent = '继续主线';
+    storyBox.scrollTop = storyBox.scrollHeight;
+  }
+}
+
+function choiceLine(sceneId, fallback){
+  const found = historyChoices.find(item => item.sceneId === sceneId);
+  if(!found) return fallback;
+  return found.customText ? `D. ${found.customText}` : `${found.key}. ${found.label}`;
+}
+
+function chapter1Style(){
+  const risk = statValue(playerStats, "女主暴露风险") + statValue(playerStats, "祭司警惕值");
+  const evidence = statValue(playerStats, "证据值") + statValue(playerStats, "静水宫线索进度");
+  const lio = statValue(playerStats, "利奥信任值");
+  if(risk >= 3) return "冒险 / 试探";
+  if(lio >= 2) return "谨慎 / 保护同伴";
+  if(evidence >= 4) return "试探 / 借势";
+  return "谨慎 / 试探";
+}
+
+function buildArchiveText(){
+  return `【《水国旧案》Chapter 1 存档】
+
+玩家风格：
+${chapter1Style()}
+
+本章关键选择：
+1. 旧图异常：${choiceLine('ch1_03_old_water_map_choice', '[未记录]')}
+2. 祭司要求删改：${choiceLine('ch1_07_submit_report_choice', '[未记录]')}
+3. 《平潮图》异常：${choiceLine('ch1_09_tide_map_choice', '[未记录]')}
+4. 蓝蜡纸片处理：${choiceLine('ch1_12_blue_note_choice', '[未记录]')}
+
+人物与风险状态：
+利奥信任值：${statValue(playerStats, "利奥信任值")}
+艾瑞克注意度：${statValue(playerStats, "艾瑞克注意度")}
+祭司警惕值：${statValue(playerStats, "祭司警惕值")}
+女主暴露风险：${statValue(playerStats, "女主暴露风险")}
+
+核心线索：
+1. 南七回流井存在异常。
+2. 静水宫校验副本存在。
+3. 柯林斯家族修补手法近年仍出现。
+4. 旧潮门成为下一章入口。
+
+下一章承接：
+明日晨钟第三响，前往旧潮门。
+
+【Chapter 1 已封档。】`;
+}
+
+function renderArchive(scene){
+  const archiveText = buildArchiveText();
+  storyBox.innerHTML = `
+    <h2>${scene.title || ''}</h2>
+    ${paragraphs(scene.text)}
+    <p><span class="blueKey">本章已自动写入本地存档。第二章会读取这些选择和生成剧情。</span></p>
+    <pre class="archivePre">${archiveText.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</pre>
+  `;
+  saveCurrentChapterState({
+    currentSceneId: scene.id,
+    archiveText,
+    completed: true
+  });
+}
+
+function manualSave(){
+  const saved = saveCurrentChapterState({currentSceneId: currentId});
+  alert(saved ? `已保存到本地：${window.WaterGameSaves.formatTime(saved.updatedAt)}` : "当前浏览器不支持本地存档。");
+}
+
+function loadChapterSave(){
+  const saved = window.WaterGameSaves?.getChapterState(storyData.id);
+  if(!saved){
+    alert("还没有找到 Chapter 1 的本地存档。");
+    return;
+  }
+  playerStats = {...playerStats, ...(saved.playerStats || {})};
+  historyChoices = Array.isArray(saved.historyChoices) ? saved.historyChoices : [];
+  currentId = saved.currentSceneId || currentId;
+  pendingNextId = null;
+  renderScene(currentId);
+  alert(`已读取本地存档：${window.WaterGameSaves.formatTime(saved.updatedAt)}`);
+}
+
+function enterLoading(){
+  startScreen.style.display = 'none';
+  loadingScreen.style.display = 'flex';
+  preloadChapterAssets();
+}
+function enterGame(){
+  if(hasEnteredGame) return;
+  hasEnteredGame = true;
+  loadingScreen.style.display = 'none';
+  game.style.display = 'flex';
+  renderScene(currentId);
+}
+document.getElementById('startHotspot').onclick = enterLoading;
+document.getElementById('loadingHotspot').onclick = enterGame;
+nextBtn.onclick = () => {
+  const scene = sceneMap.get(currentId);
+  const nextId = pendingNextId || scene?.next;
+  if(nextId){
+    renderScene(nextId);
+    saveCurrentChapterState({currentSceneId: nextId});
+  }
+  else {
+    storyBox.innerHTML += `<p><span class="blueKey">【本章结束】</span>Chapter 1 已播放完毕。</p>`;
+    storyBox.scrollTop = storyBox.scrollHeight;
+    nextBtn.style.display='none';
+  }
+};
+customInput.addEventListener('input', () => {
+  if(customInput.value.length > 20){
+    customInput.value = customInput.value.slice(0, 20);
+  }
+});
+
+customSubmit.onclick = async () => {
+  const text = customInput.value.trim();
+  if(!text || isGenerating) return;
+  if(text.length > 20){
+    alert("自定义行动最多只能输入20个字。");
+    customInput.value = text.slice(0, 20);
+    return;
+  }
+  const scene = sceneMap.get(currentId);
+  await requestAIConsequence(scene, {key:'D', label:'自定义行动', effect:'玩家输入自由行动'}, text);
+  customInput.value = '';
+};
+saveBtn.onclick = manualSave;
+loadBtn.onclick = loadChapterSave;
+document.getElementById('restartBtn').onclick = () => location.reload();
+document.getElementById('toggleMusicBtn').onclick = () => alert('这里先留音乐按钮，后面可以放 BGM。注意使用无版权或已授权音乐。');
+
+window.addEventListener('keydown', e => {
+  if(e.code === 'Space' && game.style.display === 'flex' && nextBtn.style.display !== 'none'){
+    e.preventDefault(); nextBtn.click();
+  }
+});
+</script>
+</body>
+</html>
